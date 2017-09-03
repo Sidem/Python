@@ -2,6 +2,10 @@
 import numpy as np
 np.seterr(over='ignore')
 
+def sigmoid(self, input):
+    """Applies the sigmoid function"""
+    return 1 / (1 + np.exp(-input))
+
 class NeuralNetwork():
     def __init__(self):
         np.random.seed(1)  # Seed the random number generator
@@ -16,10 +20,7 @@ class NeuralNetwork():
         self.adjustments[self.num_layers] = np.zeros(shape)
         self.num_layers += 1
 
-    def __sigmoid(self, x):
-        return 1 / (1 + np.exp(-x))
-
-    def __sigmoid_derivative(self, x):
+    def sigmoid_derivative(self, x):
         return x * (1 - x)
 
     def predict(self, data):

@@ -1,46 +1,56 @@
-from numpy import exp, array, random, dot
+import numpy as np
+
+def sigmoid(inputs, derivative=False):
+    if derivative:
+        return inputs * (1 - inputs)
+    return 1 / (1 + np.exp(-inputs))
+
+def relu(inputs, derivative=False):
+    for value in inputs:
+        if value > 0:
+            if derivative:
+                value = 1
+            else:
+                pass
+        else:
+            value = 0
+    return inputs
 
 class NeuralNet():
-    def __sigmoid(self, x, derivative=False):
-        if derivative == True:
-            return x * (1 - x)
-        return 1 / (1 + exp(-x))
-    
-    def __relu(self, layer_inputs, derivative=False):
-        for i in range(len(layer_inputs)):
-            if layer_inputs[i] > 0:
-                if derivative:
-                    layer_inputs[i] = 1
-                else:
-                    pass
-            else:
-                layer_inputs[i] = 0
-        return layer_inputs
+    """
+    Neural Network
+    """
+    def __init__(self, num_inputs):
+        np.random.seed(1)
+        self.num_inputs = num_inputs
+        self.weights = []
+        self.weights.append(2 * np.random.random((num_inputs, 1)) - 1)
 
     def __repr__(self):
-        return str(self.synaptic_weights)
+        repr_str = ""
+        for layer in self.weights:
+            repr_str += str(layer) + "\n"
+        return repr_str
     
-    def __init__(self, num_inputs, num_layers):
-        random.seed(1)
-        self.num_inputs = num_inputs
-        self.num_layers = num_layers
-        self.synaptic_weights = 2 * random.random((num_inputs, 1)) - 1
+    def addLayer(self, layer_size):
+        self.weights.append(2 * np.random.random((layer_size, 1)) - 1)
 
-    def propagate(self):
-        pass
-    
-    def b_propagate(self):
-        pass
-    
     def train(self, inputs, outputs, iterations):
         for i in range(iterations):
             output = self.think(inputs)
             error = outputs - output
-            adjustment = dot(inputs.T, error * self.__relu(output, True))
-            self.synaptic_weights += adjustment
-            
-            
-    def think(self, inputs, relu=True):
-        if relu:
-            return self.__relu(dot(inputs, self.synaptic_weights))
-        return self.__sigmoid(dot(inputs, self.synaptic_weights))
+            adjustment = np.dot(inputs.T, error * relu(output, True))
+            self.weights += adjustment
+                   
+    def think(self, inputs, mode=True):
+        """
+        args:
+            inputs: array of values
+            mode:   True    -> applies relu function
+                    False   -> applies sigmoid function
+        return:
+            resulting single value
+        """
+        if mode:
+            return relu(np.dot(inputs, self.weights))
+        return sigmoid(np.dot(inputs, self.weights))
