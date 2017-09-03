@@ -24,7 +24,6 @@ class NeuralNet():
         np.random.seed(1)
         self.num_inputs = num_inputs
         self.weights = []
-        self.weights.append(2 * np.random.random((num_inputs, 1)) - 1)
 
     def __repr__(self):
         repr_str = ""
@@ -32,8 +31,15 @@ class NeuralNet():
             repr_str += str(layer) + "\n"
         return repr_str
     
+    def __makeLayer(self, size):
+        return (2 * np.random.random((size, 1)) - 1)
+
     def addLayer(self, layer_size):
-        self.weights.append(2 * np.random.random((layer_size, 1)) - 1)
+        if len(self.weights) == 0:
+            self.weights.append(self.__makeLayer(layer_size*self.num_inputs))
+        else:
+            self.weights.append(self.__makeLayer(layer_size*len(self.weights[-1])))
+        print(str(len(self.weights[-1])))
 
     def train(self, inputs, outputs, iterations):
         for i in range(iterations):
