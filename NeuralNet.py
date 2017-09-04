@@ -1,4 +1,15 @@
+#%%
 import numpy as np
+from time import time
+
+def timeit(func):
+    def wrapper(*args, **kwargs):
+        before = time()
+        rv = func(*args, **kwargs)
+        after = time()
+        print('elapsed', after - before, 'ms')
+        return rv
+    return wrapper
 
 def sigmoid(inputs, derivative=False):
     if derivative:
@@ -15,7 +26,7 @@ def relu(inputs, derivative=False):
         else:
             value = 0
     return inputs
-
+#%%
 class NeuralNet():
     """
     Neural Network
@@ -38,25 +49,13 @@ class NeuralNet():
         if len(self.weights) == 0:
             self.weights.append(self.__makeLayer(layer_size*self.num_inputs))
         else:
-            self.weights.append(self.__makeLayer(layer_size*len(self.weights[-1])))
-        print(str(len(self.weights[-1])))
-
-    def train(self, inputs, outputs, iterations):
-        for i in range(iterations):
-            output = self.think(inputs)
-            error = outputs - output
-            adjustment = np.dot(inputs.T, error * relu(output, True))
-            self.weights += adjustment
-                   
-    def think(self, inputs, mode=True):
-        """
-        args:
-            inputs: array of values
-            mode:   True    -> applies relu function
-                    False   -> applies sigmoid function
-        return:
-            resulting single value
-        """
+            self.weights.append(self.__makeLayer(layer_size*self.weights[-1].shape[0])) 
+    
+    def process(self, inputs, mode=True):
         if mode:
             return relu(np.dot(inputs, self.weights))
         return sigmoid(np.dot(inputs, self.weights))
+    
+    def propagate(self, inputs):
+        for layer in self.weights:
+            print(layer.shape[0])
