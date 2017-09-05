@@ -1,4 +1,3 @@
-#%%
 from NeuralNet import NeuralNet
 import numpy as np
 
@@ -11,11 +10,3 @@ NN.addLayer(5)
 NN.addLayer(6)
 inputArray = np.array([0, 0, 1]).T
 NN.propagate(inputArray)
-
-#%%
-import matplotlib.pyplot as plt
-import matplotlib as mpl
-
-x = np.linspace(0, 6.283, 80)
-plt.plot(x, np.sin(x))
-plt.show()

@@ -1,6 +1,6 @@
 #%%
-import numpy as np
 from time import time
+import numpy as np
 
 def timeit(func):
     def wrapper(*args, **kwargs):
@@ -26,7 +26,7 @@ def relu(inputs, derivative=False):
         else:
             value = 0
     return inputs
-#%%
+
 class NeuralNet():
     """
     Neural Network
@@ -35,6 +35,8 @@ class NeuralNet():
         np.random.seed(1)
         self.num_inputs = num_inputs
         self.weights = []
+        self.layers = {0: num_inputs}
+        self.num_layers = 0
 
     def __repr__(self):
         repr_str = ""
@@ -46,16 +48,21 @@ class NeuralNet():
         return (2 * np.random.random((size, 1)) - 1)
 
     def addLayer(self, layer_size):
-        if len(self.weights) == 0:
+        if self.num_layers == 0:
             self.weights.append(self.__makeLayer(layer_size*self.num_inputs))
         else:
-            self.weights.append(self.__makeLayer(layer_size*self.weights[-1].shape[0])) 
-    
-    def process(self, inputs, mode=True):
+            self.weights.append(self.__makeLayer(layer_size*self.layers[self.num_layers])) 
+        self.layers[self.num_layers+1] = layer_size
+        self.num_layers += 1
+        
+
+    def process(self, inputs, layer, mode=True):
         if mode:
-            return relu(np.dot(inputs, self.weights))
-        return sigmoid(np.dot(inputs, self.weights))
+            return relu(np.dot(inputs, layer))
+        return sigmoid(np.dot(inputs, layer))
     
     def propagate(self, inputs):
+        initial_inputs = inputs
         for layer in self.weights:
-            print(layer.shape[0])
+            initial_inputs = self.process(initial_inputs, layer).T
+        return initial_inputs
