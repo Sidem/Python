@@ -17,6 +17,7 @@ def sigmoid(inputs, derivative=False):
     return 1 / (1 + np.exp(-inputs))
 
 def relu(inputs, derivative=False):
+    result = np.array([])
     for value in inputs:
         if value > 0:
             if derivative:
@@ -25,7 +26,8 @@ def relu(inputs, derivative=False):
                 pass
         else:
             value = 0
-    return inputs
+        result = np.append(result, [value])
+    return result
 
 class NeuralNet():
     """
@@ -63,6 +65,12 @@ class NeuralNet():
     
     def propagate(self, inputs):
         initial_inputs = inputs
-        for layer in self.weights:
-            initial_inputs = self.process(initial_inputs, layer).T
-        return initial_inputs
+        for layer_id in range(self.num_layers):     # parse through each layer
+            values = np.array([])
+            num_neurons = self.layers[layer_id+1]                           
+            num_inputs = self.layers[layer_id]
+            for neuron in range(num_neurons):        # parse through each neuron of following layer
+                value = np.dot(initial_inputs, self.weights[layer_id][neuron*num_inputs:neuron*num_inputs+num_inputs])
+                values = np.append(values, [value])
+            initial_inputs = relu(values)
+            print(initial_inputs)
