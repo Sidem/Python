@@ -20,7 +20,7 @@ class NeuralNetwork():
         self.adjustments[self.num_layers] = np.zeros(shape)
         self.num_layers += 1
 
-    def sigmoid_derivative(self, x):
+    def __sigmoid_derivative(self, x):
         return x * (1 - x)
 
     def predict(self, data):

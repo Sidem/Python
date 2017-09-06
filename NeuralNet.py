@@ -2,6 +2,8 @@
 from time import time
 import numpy as np
 
+LEAKY_RELU = False
+
 def timeit(func):
     def wrapper(*args, **kwargs):
         before = time()
@@ -16,7 +18,7 @@ def sigmoid(inputs, derivative=False):
         return inputs * (1 - inputs)
     return 1 / (1 + np.exp(-inputs))
 
-def relu(inputs, derivative=False):
+def relu(inputs, derivative=False, leaky=False):
     result = np.array([])
     for value in inputs:
         if value > 0:
@@ -25,7 +27,13 @@ def relu(inputs, derivative=False):
             else:
                 pass
         else:
-            value = 0
+            if leaky:
+                if derivative:
+                    value = 0.01
+                else:
+                    value = value*(-0.01)
+            else:
+                value = 0
         result = np.append(result, [value])
     return result
 
@@ -45,7 +53,13 @@ class NeuralNet():
         for layer in self.weights:
             repr_str += str(layer) + "\n"
         return repr_str
-    
+
+    def __getError(self, targets, results, squared=False):
+        if squared:
+            return np.power(results - targets, 2)
+        else:
+            return results - targets
+
     def __makeLayer(self, size):
         return (2 * np.random.random((size, 1)) - 1)
 
@@ -72,5 +86,5 @@ class NeuralNet():
             for neuron in range(num_neurons):        # parse through each neuron of following layer
                 value = np.dot(initial_inputs, self.weights[layer_id][neuron*num_inputs:neuron*num_inputs+num_inputs])
                 values = np.append(values, [value])
-            initial_inputs = relu(values)
+            initial_inputs = relu(values, False, LEAKY_RELU)
             print(initial_inputs)
