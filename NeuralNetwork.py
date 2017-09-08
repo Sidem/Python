@@ -1,17 +1,12 @@
-
 import numpy as np
 np.seterr(over='ignore')
-
-def sigmoid(self, input):
-    """Applies the sigmoid function"""
-    return 1 / (1 + np.exp(-input))
 
 class NeuralNetwork():
     def __init__(self):
         np.random.seed(1)  # Seed the random number generator
         self.weights = {}  # Create dict to hold weights
-        self.adjustments = {}  # Create dict to hold adjustements
         self.num_layers = 1  # Set initial number of layer to one (input layer)
+        self.adjustments = {}  # Create dict to hold adjustements
 
     def add_layer(self, shape):
         # Create weights with shape specified + biases
@@ -19,6 +14,9 @@ class NeuralNetwork():
         # Initialize the adjustements for these weights to zero
         self.adjustments[self.num_layers] = np.zeros(shape)
         self.num_layers += 1
+
+    def __sigmoid(self, x):
+        return 1 / (1 + np.exp(-x))
 
     def __sigmoid_derivative(self, x):
         return x * (1 - x)
@@ -70,11 +68,10 @@ class NeuralNetwork():
             self.weights[layer][-1, :] += learning_rate*1e-3 * -partial_d[-1, :]
 
 
-    def train(self, inputs, targets, num_epochs, learning_rate=1, stop_accuracy=1e-7):
+    def train(self, inputs, targets, num_epochs, learning_rate=0.1, stop_accuracy=1e-5):
         error = []
         for iteration in range(num_epochs):
             for i in range(len(inputs)):
-                print(str(np.mean(error[-(i+1):])))
                 x = inputs[i]
                 y = targets[i]
                 # Pass the training set through our neural network
@@ -105,14 +102,14 @@ if __name__ == "__main__":
     nn = NeuralNetwork()
 
     # Add Layers (Input layer is created by default)
-    nn.add_layer((2, 5))
-    nn.add_layer((5, 1))
+    nn.add_layer((2, 9))
+    nn.add_layer((9, 1))
 
     # XOR function
     training_data = np.asarray([[0, 0], [0, 1], [1, 0], [1, 1]]).reshape(4, 2, 1)
     training_labels = np.asarray([[0], [1], [1], [0]])
 
-    error, iteration = nn.train(training_data, training_labels, 500)
+    error, iteration = nn.train(training_data, training_labels, 5000)
     print('Error = ', np.mean(error[-4:]))
     print('Epoches needed to train = ', iteration)
 
