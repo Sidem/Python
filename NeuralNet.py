@@ -77,7 +77,7 @@ class NeuralNet():
         print('output', output)
         print('targets', targets)
         deltas[self.num_layers-1] = self.get_error(output[self.num_layers-1], targets)
-        for layer_id in reversed(range(self.num_layers-1)):
+        for layer_id in reversed(range(self.num_layers)):
             a_val = output[layer_id]
             weights = self.weights[layer_id][:-1, :]
             prev_deltas = deltas[layer_id+1]
