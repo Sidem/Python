@@ -10,11 +10,11 @@ class NeuralNetwork():
         Create an empty Neural Network with num_inputs sensory neurons
         Add layers to the Network with add_layer(num_neurons) the layer added last will be considered the output Layer
         """
-        np.random.seed(4)
+        np.random.seed(456)
         self.layer_neuron_counts = [num_inputs]
         self.neuron_memories = []
         self.weights = []
-        self.adjustments = {}
+        self.adjustments = []
 
     def __repr__(self):
         repr_str = 'self.layer_neuron_counts: ' + str(self.layer_neuron_counts) + '\n'
@@ -24,6 +24,9 @@ class NeuralNetwork():
         repr_str += 'self.weights: \n'
         for key in range(len(self.weights)):
             repr_str += str(self.weights[key]) + '\n'
+        repr_str += 'self.adjustments: \n'
+        for key in range(len(self.adjustments)):
+            repr_str += str(self.adjustments[key]) + '\n'
         return repr_str
 
     def __make_layer(self, shape):
@@ -32,7 +35,7 @@ class NeuralNetwork():
     def add_layer(self, layer_size):
         last_layer = self.layer_neuron_counts[-1]
         self.weights.append(self.__make_layer((layer_size, last_layer)))
-        self.adjustments[len(self.layer_neuron_counts)] = np.zeros((layer_size, last_layer))
+        self.adjustments.append(np.zeros((layer_size, last_layer)))
         self.layer_neuron_counts.append(layer_size)
 
     def process_layer(self, inputs, layer_id):
@@ -46,13 +49,15 @@ class NeuralNetwork():
         self.neuron_memories = memories
         return memories
 
-    def gradient_descent(self, batch_size, learning_rate=0.001):
+    def think(self, in_data):
+        return self.propagate(in_data)[-1]
+
+    def gradient_descent(self, batch_size, learning_rate=0.0001):
         # Calculate partial derivative and take a step in that direction
-        num_layers = len(self.layer_neuron_counts)
-        for layer in range(1, num_layers):
+        num_layers = len(self.weights)
+        for layer in range(num_layers):
             partial_d = (1/batch_size) * self.adjustments[layer]
-            self.weights[layer][:-1, :] += learning_rate * -partial_d
-            self.weights[layer][-1, :] += learning_rate * -partial_d[-1, :]
+            self.weights[layer] += learning_rate * -partial_d
 
     def back_propagate(self, targets):
         deltas = {}
@@ -66,7 +71,7 @@ class NeuralNetwork():
             relu_derivative = relu(current_layer_values, True)
             deltas[weight_set] = np.multiply(dot, relu_derivative)
         for layer in range(1, num_layers):
-            self.adjustments[layer] += np.dot(deltas[layer], self.neuron_memories[layer]).T
+            self.adjustments[layer-1] += np.dot(deltas[layer], self.neuron_memories[layer]).T
 
     def train(self, inputs, targets, iterations=2):
         for _ in range(iterations):
