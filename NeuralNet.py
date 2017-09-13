@@ -42,12 +42,17 @@ class NeuralNet():
         self.weights = []
         self.layers = {0: num_inputs}
         self.values = {}
-        self.num_layers = 0
+        self.num_layers = len(self.layers)
 
     def __repr__(self):
-        repr_str = ""
+        repr_str = "Shape: "
+        repr_str += str(self.layers) + "\n"
+        repr_str += "Values: "
         for key in self.values:
             repr_str += str(self.values[key]) + "\n"
+        repr_str += "Weights: "
+        for key in self.weights:
+            repr_str += str(self.weights[key]) + "\n"
         return repr_str
 
     def get_sum_squared_error(self, outputs, targets):
@@ -63,32 +68,24 @@ class NeuralNet():
         return (2 * np.random.random(shape) - 1)
 
     def add_layer(self, layer_size):
-        if self.num_layers == 0:
+        if self.num_layers == 1: #if only input_layer
             self.weights.append(self.__make_layer((layer_size, self.num_inputs)))
         else:
-            self.weights.append(self.__make_layer((layer_size, self.layers[self.num_layers]))) 
-        self.layers[self.num_layers+1] = layer_size
+            self.weights.append(self.__make_layer((layer_size, self.layers[self.num_layers-1])))
+        self.layers[self.num_layers] = layer_size
         self.num_layers += 1
 
     def back_propagate(self, output, targets):
         deltas = {}
         # Delta of output Layer
-        print('num_layers',self.num_layers)
-        print('output', output)
-        print('targets', targets)
         deltas[self.num_layers-1] = self.get_error(output[self.num_layers-1], targets)
         for layer_id in reversed(range(self.num_layers)):
-            a_val = output[layer_id]
-            weights = self.weights[layer_id][:-1, :]
+            layer_values = output[layer_id]
+            weights = self.weights[layer_id+1]
             prev_deltas = deltas[layer_id+1]
-            print('WEIGHT',weights)
-            print('PREV_DELTAS',prev_deltas)
             dot = np.dot(weights, prev_deltas)
-            aval_relu = relu(a_val, True)
-            print('AVAL',a_val)
-            print('DOT',dot)
-            print('AVAL_RELU',aval_relu)
-            deltas[layer_id] = np.multiply(dot, aval_relu)
+            layer_values_relu_derivative = relu(layer_values, True)
+            deltas[layer_id] = np.multiply(dot, layer_values_relu_derivative)
 
     def train(self, inputs, targets, iterations):
         error = []
@@ -96,7 +93,7 @@ class NeuralNet():
             for i in range(len(inputs)):
                 x, y = inputs[i], targets[i]
                 output = self.propagate(x)
-                loss = self.get_sum_squared_error(output[self.num_layers-1], targets)
+                loss = self.get_sum_squared_error(output[self.num_layers-2], y)
                 error.append(loss)
                 self.back_propagate(output, y)
 
@@ -104,7 +101,8 @@ class NeuralNet():
         return relu(np.array([np.dot(inputs, layer)]))        
 
     def process_layer(self, inputs, layer_id):
-        values, num_neurons, num_inputs = np.array([]), self.layers[layer_id+1], self.layers[layer_id]
+        values = np.array([])
+        num_neurons = self.layers[layer_id]
         for neuron_id in range(num_neurons):        # parse through each neuron of layer
             value = self.process(inputs, self.weights[layer_id][neuron_id])
             values = np.append(values, [value])
@@ -112,7 +110,7 @@ class NeuralNet():
 
     @timeit
     def propagate(self, inputs):
-        values = {}
+        values = {0: inputs}
         for layer_id in range(self.num_layers):     # parse through each layer
             inputs = self.process_layer(inputs, layer_id)
             values[layer_id] = inputs
