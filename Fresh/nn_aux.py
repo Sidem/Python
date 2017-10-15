@@ -1,7 +1,7 @@
 from time import time
 import numpy as np
 
-LEAKY_RELU = True
+LEAKY_RELU = False
 
 def timeit(func):
     def wrapper(*args, **kwargs):
@@ -22,14 +22,14 @@ def relu_derivative(x):
             return 0
 
 def relu(x, derivative=False):
-    """
+    '''
     arguments:    
         x:          numpy array
         derivative: boolean
     return:
         rectification of x ( x if x is positive else 0 or x/100(leaky) )
         if derivative is true -> 1 or 0/0.01(leaky)
-    """
+    '''
     if derivative:
         return np.fromiter((relu_derivative(xi) for xi in x), x.dtype)
     else:
